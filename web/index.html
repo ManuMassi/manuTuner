@@ -1,0 +1,1014 @@
+<meta charset="utf-8">
+<title>manuTuner</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  /* ------------------------------------------------------------ tokens
+     Bare :root is the complete light palette. The dark set is redefined
+     once, for: the system preference, the host's data-theme stamp, and the
+     in-page chooser (data-skin) -- which wins over both. */
+  :root {
+    color-scheme: light;
+
+    --ground: #e8eaef;
+    --panel: #ffffff;
+    --raised: #f2f4f8;
+    --edge: #d3d8e0;
+    --text: #131820;
+    --muted: #5d6678;
+    --bronze: #8a6a38;
+    --tick: rgba(138, 106, 56, 0.32);
+    --tick-major: rgba(138, 106, 56, 0.68);
+    --arc: rgba(138, 106, 56, 0.3);
+
+    --in-tune: #0f9a55;
+    --near: #a6761a;
+    --far: #cc352d;
+
+    --wire-a: #9aa2b2;
+    --wire-b: #6d768a;
+    --meter: #1b2230;
+
+    --btn-bg: #8a6a38;
+    --btn-fg: #ffffff;
+
+    --glow: 0 0 0 0;
+    --card-shadow: 0 18px 44px -26px rgba(20, 28, 45, 0.5);
+    --face: radial-gradient(125% 65% at 50% 0%, #ffffff 0%, var(--ground) 78%);
+    --caret: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235d6678' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]):not([data-skin="light"]) {
+      color-scheme: dark;
+      --ground: #0b0e13;
+      --panel: #141922;
+      --raised: #1a2230;
+      --edge: #1e2633;
+      --text: #e8ebf0;
+      --muted: #78829a;
+      --bronze: #c3a06a;
+      --tick: rgba(195, 160, 106, 0.28);
+      --tick-major: rgba(195, 160, 106, 0.6);
+      --arc: rgba(195, 160, 106, 0.22);
+      --in-tune: #3de58a;
+      --near: #f2c14e;
+      --far: #f4695f;
+      --wire-a: #7b8296;
+      --wire-b: #545c70;
+      --meter: #1b2230;
+      --btn-bg: #c3a06a;
+      --btn-fg: #0b0e13;
+      --glow: 0 0 14px -1px;
+      --card-shadow: 0 26px 64px -24px rgba(0, 0, 0, 0.85);
+      --face: radial-gradient(125% 65% at 50% 0%, #131923 0%, var(--ground) 74%);
+      --caret: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2378829a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    }
+  }
+
+  :root[data-theme="dark"]:not([data-skin="light"]),
+  :root[data-skin="dark"] {
+    color-scheme: dark;
+    --ground: #0b0e13;
+    --panel: #141922;
+    --raised: #1a2230;
+    --edge: #1e2633;
+    --text: #e8ebf0;
+    --muted: #78829a;
+    --bronze: #c3a06a;
+    --tick: rgba(195, 160, 106, 0.28);
+    --tick-major: rgba(195, 160, 106, 0.6);
+    --arc: rgba(195, 160, 106, 0.22);
+    --in-tune: #3de58a;
+    --near: #f2c14e;
+    --far: #f4695f;
+    --wire-a: #7b8296;
+    --wire-b: #545c70;
+    --meter: #1b2230;
+    --btn-bg: #c3a06a;
+    --btn-fg: #0b0e13;
+    --glow: 0 0 14px -1px;
+    --card-shadow: 0 26px 64px -24px rgba(0, 0, 0, 0.85);
+    --face: radial-gradient(125% 65% at 50% 0%, #131923 0%, var(--ground) 74%);
+    --caret: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2378829a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  }
+
+  :root {
+    --sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    --cond: "IBM Plex Sans Condensed", "IBM Plex Sans", ui-sans-serif, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app {
+    min-height: 100dvh;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+  }
+
+  .device {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 16px 18px 20px;
+    background: var(--face);
+    border-left: 1px solid var(--edge);
+    border-right: 1px solid var(--edge);
+  }
+
+  /* ----------------------------------------------------------- masthead */
+
+  .masthead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .wordmark {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font: 600 15px/1 var(--sans);
+    letter-spacing: -0.01em;
+    color: var(--text);
+    user-select: none;
+  }
+  .wordmark b { font-weight: 400; color: var(--muted); }
+  .wordmark .pip {
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    flex: none;
+    display: block;
+    border: 1px solid var(--edge);
+  }
+
+  .theme {
+    appearance: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--panel);
+    border: 1px solid var(--edge);
+    border-radius: 20px;
+    color: var(--muted);
+    font: 500 11px/1 var(--sans);
+    letter-spacing: 0.03em;
+    padding: 6px 11px 6px 8px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .theme:hover { color: var(--text); border-color: var(--bronze); }
+  .theme svg { width: 13px; height: 13px; flex: none; }
+
+  /* ----------------------------------------------------------- controls */
+
+  .modes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    padding: 2px;
+    background: var(--panel);
+    border: 1px solid var(--edge);
+    border-radius: 10px;
+  }
+
+  .modes button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font: 500 13px/1 var(--sans);
+    letter-spacing: 0.03em;
+    padding: 9px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .modes button:hover { color: var(--text); }
+  .modes button[aria-pressed="true"] { background: var(--raised); color: var(--text); }
+
+  .settings { display: flex; gap: 9px; }
+  .field { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+  .field.ref { flex: 0 0 122px; }
+
+  .field label {
+    font: 500 9px/1 var(--sans);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--bronze);
+  }
+
+  .field select {
+    appearance: none;
+    width: 100%;
+    background: var(--panel) var(--caret) no-repeat right 10px center;
+    border: 1px solid var(--edge);
+    border-radius: 9px;
+    color: var(--text);
+    font: 400 13px/1 var(--sans);
+    padding: 9px 26px 9px 10px;
+    cursor: pointer;
+    text-overflow: ellipsis;
+    transition: border-color 0.15s;
+  }
+  .field select:hover { border-color: var(--bronze); }
+  .field.hidden { visibility: hidden; }
+
+  select:focus-visible,
+  button:focus-visible { outline: 2px solid var(--bronze); outline-offset: 2px; }
+
+  /* ------------------------------------------------------------- readout */
+
+  .stage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .readout { text-align: center; }
+
+  .note {
+    font: 700 80px/0.9 var(--cond);
+    letter-spacing: -0.025em;
+    color: var(--muted);
+    transition: color 0.18s;
+  }
+  .note sub {
+    font-size: 28px;
+    font-weight: 600;
+    vertical-align: baseline;
+    opacity: 0.5;
+    margin-left: 2px;
+  }
+  .note:not(.live) { opacity: 0.4; }
+  .note.live { color: var(--state, var(--in-tune)); }
+
+  .hz {
+    margin-top: 7px;
+    font: 400 11.5px/1 var(--mono);
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    min-height: 13px;
+  }
+
+  /* ---------------------------------------------------------------- dial */
+
+  .dial { position: relative; width: 100%; max-width: 336px; margin: 0 auto; aspect-ratio: 320 / 190; }
+  .dial svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  .needle {
+    position: absolute;
+    left: 50%;
+    bottom: 4.21%;
+    width: 3px;
+    height: 69.5%;
+    margin-left: -1.5px;
+    border-radius: 2px;
+    background: var(--muted);
+    transform-origin: 50% 100%;
+    transform: rotate(0deg);
+    box-shadow: var(--glow) transparent;
+    transition: transform 0.11s cubic-bezier(0.22, 1, 0.36, 1), background 0.18s, box-shadow 0.18s;
+  }
+  .needle.live {
+    background: var(--state, var(--in-tune));
+    box-shadow: var(--glow) var(--state, var(--in-tune));
+  }
+
+  .hub {
+    position: absolute;
+    left: 50%;
+    bottom: 4.21%;
+    width: 13px;
+    height: 13px;
+    margin: 0 0 -6.5px -6.5px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background 0.18s;
+  }
+  .hub.live { background: var(--state, var(--in-tune)); }
+
+  #zone { transition: opacity 0.2s, stroke-width 0.2s; }
+  .dial.tuned #zone { opacity: 1; stroke-width: 6; }
+
+  .cents {
+    text-align: center;
+    font: 500 24px/1 var(--mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    transition: color 0.18s;
+    min-height: 25px;
+  }
+  .cents.live { color: var(--state, var(--in-tune)); }
+
+  /* --------------------------------------------------------- string rail */
+
+  .rail { display: flex; gap: 6px; }
+
+  .string {
+    flex: 1;
+    appearance: none;
+    background: var(--panel);
+    border: 1px solid var(--edge);
+    border-radius: 11px;
+    padding: 9px 0 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    position: relative;
+    min-width: 0;
+    transition: border-color 0.18s, background 0.18s, transform 0.12s;
+  }
+  .string:hover { border-color: var(--bronze); }
+  .string:active { transform: scale(0.97); }
+
+  /* Drawn at true relative gauge: the wound low string on the left tapers to
+     the plain high string on the right, so the rail reads as a set of strings. */
+  .string .wire {
+    display: block;
+    width: var(--gauge, 3px);
+    height: 20px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, var(--wire-a) 0%, var(--wire-b) 100%);
+    box-shadow: var(--glow) transparent;
+    transition: background 0.18s, box-shadow 0.18s;
+  }
+
+  .string .name {
+    font: 600 14px/1 var(--cond);
+    color: var(--muted);
+    transition: color 0.18s;
+  }
+  .string .name sub { font-size: 8.5px; vertical-align: baseline; opacity: 0.6; }
+
+  .string .num {
+    position: absolute;
+    top: 5px;
+    left: 6px;
+    font: 400 8px/1 var(--mono);
+    color: var(--muted);
+    opacity: 0.55;
+  }
+
+  .string[data-active="true"] {
+    border-color: var(--state, var(--in-tune));
+    background: var(--raised);
+  }
+  .string[data-active="true"] .wire {
+    background: var(--state, var(--in-tune));
+    box-shadow: var(--glow) var(--state, var(--in-tune));
+  }
+  .string[data-active="true"] .name { color: var(--text); }
+  .string[data-locked="true"] { border-color: var(--bronze); }
+  .string[data-tuned="true"]::after {
+    content: "";
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--in-tune);
+  }
+
+  /* -------------------------------------------------------------- footer */
+
+  footer { display: flex; flex-direction: column; gap: 10px; }
+
+  .level { height: 3px; border-radius: 2px; background: var(--edge); overflow: hidden; }
+  .level i {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: var(--bronze);
+    transition: width 0.1s linear;
+  }
+
+  .power {
+    appearance: none;
+    border: 1px solid transparent;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    font: 600 14px/1 var(--sans);
+    letter-spacing: 0.02em;
+    padding: 14px 0;
+    border-radius: 11px;
+    cursor: pointer;
+    transition: filter 0.15s, background 0.15s, color 0.15s, border-color 0.15s;
+  }
+  .power:hover { filter: brightness(1.08); }
+  .power[data-on="true"] {
+    background: transparent;
+    border-color: var(--edge);
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .power[data-on="true"]:hover { color: var(--text); border-color: var(--bronze); }
+  .power:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .status {
+    text-align: center;
+    font: 400 11px/1.5 var(--sans);
+    color: var(--muted);
+    min-height: 17px;
+  }
+  .status.error { color: var(--far); }
+
+  .keys {
+    display: none;
+    justify-content: center;
+    gap: 14px;
+    font: 400 10px/1 var(--sans);
+    color: var(--muted);
+    opacity: 0.8;
+  }
+  .keys kbd {
+    font: 500 10px/1 var(--mono);
+    background: var(--panel);
+    border: 1px solid var(--edge);
+    border-radius: 4px;
+    padding: 3px 5px;
+    margin-right: 4px;
+  }
+
+  /* ------------------------------------------------------------- desktop */
+
+  @media (min-width: 700px) {
+    .app { align-items: center; padding: 36px 20px; }
+    .device {
+      max-width: 468px;
+      min-height: 0;
+      gap: 14px;
+      padding: 20px 22px 22px;
+      border: 1px solid var(--edge);
+      border-radius: 22px;
+      box-shadow: var(--card-shadow);
+    }
+    .note { font-size: 86px; }
+    .note sub { font-size: 27px; }
+    .cents { font-size: 26px; }
+    .keys { display: flex; }
+  }
+
+  @media (max-height: 680px) {
+    .note { font-size: 72px; }
+    .note sub { font-size: 23px; }
+    .device { gap: 11px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .needle { transition: background 0.18s, box-shadow 0.18s; }
+    .string:active { transform: none; }
+  }
+</style>
+
+<div class="app">
+  <div class="device">
+    <header class="masthead">
+      <div class="wordmark"><img class="pip" src="favicon.png" alt=""><b>manu</b>Tuner</div>
+      <button class="theme" id="theme" type="button" aria-label="Colour theme: auto"></button>
+    </header>
+
+    <div class="modes" role="group" aria-label="Tuner mode">
+      <button id="modeAuto" type="button" aria-pressed="true">Auto</button>
+      <button id="modeChrom" type="button" aria-pressed="false">Chromatic</button>
+    </div>
+
+    <div class="settings">
+      <div class="field" id="tuningField">
+        <label for="tuning">Tuning</label>
+        <select id="tuning"></select>
+      </div>
+      <div class="field ref">
+        <label for="a4">Reference</label>
+        <select id="a4"></select>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="readout">
+        <div class="note" id="note">&mdash;</div>
+        <div class="hz" id="hz">Press start, then play one string</div>
+      </div>
+
+      <div class="dial" id="dial">
+        <svg id="scale" viewBox="0 0 320 190" aria-hidden="true"></svg>
+        <div class="needle" id="needle"></div>
+        <div class="hub" id="hub"></div>
+      </div>
+
+      <div class="cents" id="cents">&ndash;&ndash;</div>
+      <div class="rail" id="rail"></div>
+    </div>
+
+    <footer>
+      <div class="level"><i id="level"></i></div>
+      <button class="power" id="power" type="button">Start tuning</button>
+      <div class="keys">
+        <span><kbd>Space</kbd>start / stop</span>
+        <span><kbd>1</kbd>&ndash;<kbd>6</kbd>lock a string</span>
+      </div>
+      <div class="status" id="status">Audio is analysed on your device and never leaves it.</div>
+    </footer>
+  </div>
+</div>
+
+<script src="pitch.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var el = {};
+  ['note', 'hz', 'cents', 'needle', 'hub', 'rail', 'level', 'power', 'status',
+   'scale', 'tuning', 'tuningField', 'a4', 'modeAuto', 'modeChrom', 'theme', 'dial'
+  ].forEach(function (id) { el[id] = document.getElementById(id); });
+
+  function store(key, value) {
+    try {
+      if (value === undefined) return localStorage.getItem(key);
+      localStorage.setItem(key, value);
+    } catch (e) { /* private mode: settings just won't persist */ }
+    return null;
+  }
+
+  // ------------------------------------------------------------- theme
+
+  var ICONS = {
+    auto: '<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.6"/><path d="M8 2a6 6 0 010 12z" fill="currentColor"/></svg>',
+    light: '<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="3.1" stroke="currentColor" stroke-width="1.6"/><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 1v1.6M8 13.4V15M15 8h-1.6M2.6 8H1M12.9 3.1l-1.1 1.1M4.2 11.8l-1.1 1.1M12.9 12.9l-1.1-1.1M4.2 4.2L3.1 3.1"/></g></svg>',
+    dark: '<svg viewBox="0 0 16 16" fill="none"><path d="M13.5 9.9A6 6 0 016.1 2.5a6 6 0 107.4 7.4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>'
+  };
+  var THEMES = ['auto', 'light', 'dark'];
+  var theme = store('tuner.theme') || 'auto';
+  if (THEMES.indexOf(theme) < 0) theme = 'auto';
+
+  function applyTheme() {
+    var root = document.documentElement;
+    if (theme === 'auto') root.removeAttribute('data-skin');
+    else root.setAttribute('data-skin', theme);
+    el.theme.innerHTML = ICONS[theme] + '<span>' + theme.charAt(0).toUpperCase() + theme.slice(1) + '</span>';
+    el.theme.setAttribute('aria-label', 'Colour theme: ' + theme + '. Click to change.');
+  }
+
+  el.theme.addEventListener('click', function () {
+    theme = THEMES[(THEMES.indexOf(theme) + 1) % THEMES.length];
+    store('tuner.theme', theme);
+    applyTheme();
+  });
+  applyTheme();
+
+  // ------------------------------------------------------ library guard
+
+  var T = window.Tuner;
+  if (!T) {
+    el.status.textContent = 'pitch.js did not load, so the tuner cannot run. Serve this page and pitch.js from the same folder.';
+    el.status.className = 'status error';
+    el.power.disabled = true;
+    return;
+  }
+
+  var SPAN = 50;     // cents at full needle deflection
+  var SWEEP = 58;    // degrees at full deflection
+
+  var state = {
+    mode: store('tuner.mode') || 'auto',
+    tuning: T.TUNINGS.filter(function (t) { return t.id === (store('tuner.tuning') || 'standard'); })[0] || T.TUNINGS[0],
+    a4: parseFloat(store('tuner.a4')) || 440,
+    locked: null,
+    tuned: {},
+    running: false
+  };
+
+  // ----------------------------------------------------------- dial face
+
+  (function drawScale() {
+    var NS = 'http://www.w3.org/2000/svg';
+    var cx = 160, cy = 182, r = 150;
+
+    function at(cents, radius) {
+      var a = (SWEEP * cents / SPAN - 90) * Math.PI / 180;
+      return [cx + Math.cos(a) * radius, cy + Math.sin(a) * radius];
+    }
+    function add(tag, attrs, text) {
+      var n = document.createElementNS(NS, tag);
+      for (var k in attrs) n.setAttribute(k, attrs[k]);
+      if (text !== undefined) n.textContent = text;
+      el.scale.appendChild(n);
+      return n;
+    }
+    function arc(from, to, radius) {
+      var a = at(from, radius), b = at(to, radius);
+      return 'M' + a[0] + ' ' + a[1] + ' A' + radius + ' ' + radius + ' 0 0 1 ' + b[0] + ' ' + b[1];
+    }
+
+    add('path', { d: arc(-SPAN, SPAN, r), fill: 'none', stroke: 'var(--arc)', 'stroke-width': 2 });
+
+    for (var c = -SPAN; c <= SPAN; c += 5) {
+      var major = Math.abs(c) % 25 === 0;
+      var mid = !major && Math.abs(c) % 10 === 0;
+      var p1 = at(c, r * (major ? 0.83 : mid ? 0.87 : 0.92));
+      var p2 = at(c, r);
+      add('line', {
+        x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1],
+        stroke: major || mid ? 'var(--tick-major)' : 'var(--tick)',
+        'stroke-width': major ? 2.2 : mid ? 1.6 : 1,
+        'stroke-linecap': 'round'
+      });
+    }
+
+    // Numeric scale outside the arc, so the readout can be checked at a glance.
+    [-50, -25, 0, 25, 50].forEach(function (c) {
+      var p = at(c, r * 1.055);
+      add('text', {
+        x: p[0], y: p[1], fill: 'var(--muted)', 'text-anchor': 'middle',
+        'dominant-baseline': 'central', 'font-family': 'IBM Plex Mono, monospace',
+        'font-size': 9.5
+      }, c > 0 ? '+' + c : String(c));
+    });
+
+    [[-SPAN, '♭'], [SPAN, '♯']].forEach(function (pair) {
+      var p = at(pair[0], r * 0.73);
+      add('text', {
+        x: p[0], y: p[1], fill: 'var(--bronze)', 'text-anchor': 'middle',
+        'dominant-baseline': 'central', 'font-family': 'IBM Plex Sans, sans-serif',
+        'font-size': 16, 'font-weight': 600
+      }, pair[1]);
+    });
+
+    var m1 = at(0, r * 0.74), m2 = at(0, r);
+    add('line', {
+      x1: m1[0], y1: m1[1], x2: m2[0], y2: m2[1],
+      stroke: 'var(--in-tune)', 'stroke-width': 2.5, opacity: 0.8, 'stroke-linecap': 'round'
+    });
+
+    add('path', {
+      id: 'zone', d: arc(-T.IN_TUNE_CENTS, T.IN_TUNE_CENTS, r), fill: 'none',
+      stroke: 'var(--in-tune)', 'stroke-width': 4, opacity: 0.6, 'stroke-linecap': 'round'
+    });
+  })();
+
+  // ------------------------------------------------------------ controls
+
+  (function buildSelects() {
+    var groups = {};
+    T.TUNINGS.forEach(function (t) {
+      if (!groups[t.instrument]) {
+        groups[t.instrument] = document.createElement('optgroup');
+        groups[t.instrument].label = t.instrument;
+        el.tuning.appendChild(groups[t.instrument]);
+      }
+      var o = document.createElement('option');
+      o.value = t.id;
+      o.textContent = t.name;
+      groups[t.instrument].appendChild(o);
+    });
+    el.tuning.value = state.tuning.id;
+
+    for (var hz = 432; hz <= 446; hz++) {
+      var o2 = document.createElement('option');
+      o2.value = String(hz);
+      o2.textContent = 'A4 = ' + hz + ' Hz';
+      el.a4.appendChild(o2);
+    }
+    el.a4.value = String(state.a4);
+  })();
+
+  /* Guitarists count strings from the highest pitch down, so the low E in a
+     six-string tuning is the 6th. */
+  function stringNumber(i) { return state.tuning.midis.length - i; }
+
+  function buildRail() {
+    el.rail.innerHTML = '';
+    var midis = state.tuning.midis;
+    midis.forEach(function (midi, i) {
+      var b = document.createElement('button');
+      b.className = 'string';
+      b.type = 'button';
+      var gauge = 5.2 - (i / Math.max(1, midis.length - 1)) * 3.8;
+      b.style.setProperty('--gauge', gauge.toFixed(1) + 'px');
+      b.setAttribute('aria-label', 'Lock to string ' + stringNumber(i) + ', ' + T.noteLabel(midi));
+      b.innerHTML = '<span class="num">' + stringNumber(i) + '</span>' +
+        '<span class="wire"></span><span class="name">' +
+        T.noteName(midi) + '<sub>' + T.noteOctave(midi) + '</sub></span>';
+      b.addEventListener('click', function () { toggleLock(i); });
+      el.rail.appendChild(b);
+    });
+    paintRail();
+  }
+
+  function toggleLock(i) {
+    state.locked = (state.locked === i) ? null : i;
+    matcher.reset();
+    paintRail();
+  }
+
+  function paintRail() {
+    var kids = el.rail.children;
+    for (var i = 0; i < kids.length; i++) {
+      kids[i].setAttribute('data-active', String(display.stringIndex === i && display.active));
+      kids[i].setAttribute('data-locked', String(state.locked === i));
+      kids[i].setAttribute('data-tuned', String(!!state.tuned[i]));
+    }
+  }
+
+  function applyMode() {
+    var auto = state.mode === 'auto';
+    el.modeAuto.setAttribute('aria-pressed', String(auto));
+    el.modeChrom.setAttribute('aria-pressed', String(!auto));
+    el.tuningField.classList.toggle('hidden', !auto);
+    el.rail.style.display = auto ? 'flex' : 'none';
+  }
+
+  function setMode(m) {
+    state.mode = m;
+    state.locked = null;
+    store('tuner.mode', m);
+    matcher.reset();
+    resetDisplay();
+    applyMode();
+    paintRail();
+  }
+
+  el.modeAuto.addEventListener('click', function () { setMode('auto'); });
+  el.modeChrom.addEventListener('click', function () { setMode('chromatic'); });
+
+  el.tuning.addEventListener('change', function () {
+    state.tuning = T.TUNINGS.filter(function (t) { return t.id === el.tuning.value; })[0];
+    store('tuner.tuning', state.tuning.id);
+    state.locked = null;
+    state.tuned = {};
+    matcher.reset();
+    resetDisplay();
+    buildRail();
+  });
+
+  el.a4.addEventListener('change', function () {
+    state.a4 = parseFloat(el.a4.value);
+    store('tuner.a4', el.a4.value);
+    state.tuned = {};
+    resetDisplay();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.target && /^(SELECT|INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
+    if (e.code === 'Space' || e.key === ' ') { e.preventDefault(); start(); return; }
+    if (state.mode !== 'auto') return;
+    var n = parseInt(e.key, 10);
+    if (n >= 1 && n <= state.tuning.midis.length) toggleLock(state.tuning.midis.length - n);
+  });
+
+  // ------------------------------------------------------------- display
+
+  var matcher = new T.StringMatcher();
+  var display = { active: false, stringIndex: null };
+  var history = [];
+  var smoothed = null;
+  var lastVoiced = 0;
+  var inTuneFrames = 0;
+
+  function stateColour(cents) {
+    var m = Math.abs(cents);
+    if (m <= T.IN_TUNE_CENTS) return 'var(--in-tune)';
+    if (m <= 15) return 'var(--near)';
+    return 'var(--far)';
+  }
+
+  function resetDisplay() {
+    history = [];
+    smoothed = null;
+    inTuneFrames = 0;
+    display = { active: false, stringIndex: null };
+    el.note.textContent = '—';
+    el.note.classList.remove('live');
+    el.cents.textContent = '––';
+    el.cents.classList.remove('live');
+    el.needle.classList.remove('live');
+    el.hub.classList.remove('live');
+    el.dial.classList.remove('tuned');
+    el.needle.style.transform = 'rotate(0deg)';
+    el.hz.textContent = state.running ? 'Play a single string' : 'Press start, then play one string';
+    paintRail();
+  }
+
+  function render(r) {
+    var clamped = Math.max(-SPAN, Math.min(SPAN, r.cents));
+    var tuned = Math.abs(r.cents) <= T.IN_TUNE_CENTS;
+
+    document.documentElement.style.setProperty('--state', stateColour(r.cents));
+    el.note.innerHTML = r.noteName + '<sub>' + r.octave + '</sub>';
+    el.note.classList.add('live');
+    el.hz.textContent = r.frequency.toFixed(1) + ' Hz → ' + r.target.toFixed(1) + ' Hz';
+    el.cents.textContent = tuned
+      ? 'In tune'
+      : (r.cents > 0 ? '+' : '−') + Math.abs(r.cents).toFixed(1) + ' ¢';
+    el.cents.classList.add('live');
+    el.needle.style.transform = 'rotate(' + (SWEEP * clamped / SPAN).toFixed(2) + 'deg)';
+    el.needle.classList.add('live');
+    el.hub.classList.add('live');
+    el.dial.classList.toggle('tuned', tuned);
+  }
+
+  // --------------------------------------------------------------- audio
+
+  var audio = { ctx: null, stream: null, analyser: null, detector: null,
+                factor: 1, raw: null, work: null, timer: null, wakeLock: null };
+
+  function setStatus(text, isError) {
+    el.status.textContent = text;
+    el.status.classList.toggle('error', !!isError);
+  }
+
+  async function start() {
+    if (state.running) return stop();
+
+    if (!window.isSecureContext) {
+      setStatus('Microphone needs a secure page. Open this over https:// or from localhost.', true);
+      return;
+    }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setStatus('This browser has no microphone API. Try Safari, Chrome or Firefox.', true);
+      return;
+    }
+
+    el.power.textContent = 'Starting…';
+    try {
+      audio.stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: false,   // the tuner needs the raw signal:
+          noiseSuppression: false,   // these would reshape the harmonics
+          autoGainControl: false,
+          channelCount: 1
+        }
+      });
+    } catch (err) {
+      el.power.textContent = 'Start tuning';
+      if (err && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
+        setStatus('Microphone blocked. Allow mic access for this page, then press start again.', true);
+      } else if (err && err.name === 'NotFoundError') {
+        setStatus('No microphone found on this device.', true);
+      } else {
+        setStatus('Could not open the microphone: ' + (err && err.message ? err.message : err), true);
+      }
+      return;
+    }
+
+    var Ctx = window.AudioContext || window.webkitAudioContext;
+    audio.ctx = new Ctx();
+    if (audio.ctx.state === 'suspended') await audio.ctx.resume();
+
+    var rate = audio.ctx.sampleRate;
+    // Keep the factor a power of two so fftSize stays legal.
+    var exp = Math.round(Math.log2(rate / 12000));
+    audio.factor = Math.max(1, Math.min(16, Math.pow(2, Math.max(0, exp))));
+    var workRate = rate / audio.factor;
+
+    var node = audio.ctx.createMediaStreamSource(audio.stream);
+    // Native 6th-order Butterworth: the anti-alias filter runs in the audio
+    // graph, so JS only ever sees decimated samples.
+    var cutoff = Math.min(2600, workRate * 0.22);
+    T.BUTTERWORTH_Q.forEach(function (q) {
+      var f = audio.ctx.createBiquadFilter();
+      f.type = 'lowpass';
+      f.frequency.value = cutoff;
+      f.Q.value = q;
+      node.connect(f);
+      node = f;
+    });
+
+    audio.analyser = audio.ctx.createAnalyser();
+    audio.analyser.fftSize = Math.min(32768, 2048 * audio.factor);
+    audio.analyser.smoothingTimeConstant = 0;
+    node.connect(audio.analyser);
+
+    audio.raw = new Float32Array(audio.analyser.fftSize);
+    audio.work = new Float32Array(2048);
+    audio.detector = new T.NSDFDetector(workRate, 2048);
+
+    state.running = true;
+    el.power.textContent = 'Stop';
+    el.power.setAttribute('data-on', 'true');
+    setStatus('Listening — ' + Math.round(workRate) + ' Hz analysis, lags ' +
+              audio.detector.minLag + '–' + audio.detector.maxLag);
+    resetDisplay();
+
+    try {
+      if (navigator.wakeLock) audio.wakeLock = await navigator.wakeLock.request('screen');
+    } catch (e) { /* not fatal */ }
+
+    tick();
+  }
+
+  function stop() {
+    state.running = false;
+    if (audio.timer) { clearTimeout(audio.timer); audio.timer = null; }
+    if (audio.stream) audio.stream.getTracks().forEach(function (t) { t.stop(); });
+    if (audio.ctx) audio.ctx.close();
+    if (audio.wakeLock) { try { audio.wakeLock.release(); } catch (e) {} audio.wakeLock = null; }
+    audio.ctx = audio.stream = audio.analyser = audio.detector = null;
+    el.power.textContent = 'Start tuning';
+    el.power.removeAttribute('data-on');
+    el.level.style.width = '0%';
+    setStatus('Stopped. Audio is analysed on your device and never leaves it.');
+    resetDisplay();
+  }
+
+  function tick() {
+    if (!state.running) return;
+    audio.timer = setTimeout(tick, 43);   // ~23 Hz
+
+    audio.analyser.getFloatTimeDomainData(audio.raw);
+    var f = audio.factor;
+    for (var i = 0, j = 0; j < 2048; i += f, j++) audio.work[j] = audio.raw[i];
+
+    var res = audio.detector.detect(audio.work);
+    el.level.style.width = Math.min(100, res.rms * 1200).toFixed(0) + '%';
+
+    if (res.frequency <= 0) {
+      if (display.active && performance.now() - lastVoiced > 1000) resetDisplay();
+      return;
+    }
+    lastVoiced = performance.now();
+
+    var rawMidi = T.midiFromFreq(res.frequency, state.a4);
+    history.push(rawMidi);
+    if (history.length > 5) history.shift();
+    var median = history.slice().sort(function (a, b) { return a - b; })[history.length >> 1];
+
+    if (smoothed !== null && Math.abs(median - smoothed) < 1.0) {
+      smoothed = smoothed + (median - smoothed) * 0.25;
+    } else {
+      smoothed = median;            // new note: jump rather than glide
+    }
+
+    var freq = T.freqFromMidi(smoothed, state.a4);
+    var target, noteName, octave, stringIndex = null;
+
+    if (state.mode === 'chromatic') {
+      var nearest = Math.round(smoothed);
+      target = T.freqFromMidi(nearest, state.a4);
+      noteName = T.noteName(nearest);
+      octave = T.noteOctave(nearest);
+    } else {
+      stringIndex = (state.locked !== null && state.locked < state.tuning.midis.length)
+        ? state.locked
+        : matcher.update(smoothed, state.tuning.midis);
+      var midi = state.tuning.midis[stringIndex];
+      target = T.freqFromMidi(midi, state.a4);
+      noteName = T.noteName(midi);
+      octave = T.noteOctave(midi);
+    }
+
+    var cents = T.centsBetween(freq, target);
+    var repaint = display.stringIndex !== stringIndex;
+    display = { active: true, stringIndex: stringIndex };
+    render({ frequency: freq, target: target, cents: cents, noteName: noteName, octave: octave });
+
+    if (Math.abs(cents) <= T.IN_TUNE_CENTS) {
+      inTuneFrames++;
+      if (inTuneFrames >= 3 && stringIndex !== null && !state.tuned[stringIndex]) {
+        state.tuned[stringIndex] = true;
+        if (navigator.vibrate) navigator.vibrate(18);
+        repaint = true;
+      }
+    } else {
+      inTuneFrames = 0;
+      if (stringIndex !== null && state.tuned[stringIndex] && Math.abs(cents) > 10) {
+        delete state.tuned[stringIndex];
+        repaint = true;
+      }
+    }
+    if (repaint) paintRail();
+  }
+
+  el.power.addEventListener('click', start);
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden && state.running) stop();
+  });
+
+  applyMode();
+  buildRail();
+  resetDisplay();
+})();
+</script>

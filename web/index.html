@@ -140,23 +140,32 @@
     gap: 10px;
   }
 
+  /* One bordered lockup so the mark and the name read as a single logo.
+     The gap sits only between icon and name -- "manu" and "Tuner" are one
+     flex item, joined, and separated by weight alone. */
   .wordmark {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 7px;
-    font: 600 15px/1 var(--sans);
-    letter-spacing: -0.01em;
+    gap: 8px;
+    padding: 5px 13px 5px 5px;
+    background: var(--panel);
+    border: 1px solid var(--edge);
+    border-radius: 22px;
     color: var(--text);
     user-select: none;
   }
-  .wordmark b { font-weight: 400; color: var(--muted); }
+  .wordmark .name {
+    font: 600 15px/1 var(--sans);
+    letter-spacing: -0.015em;
+    white-space: nowrap;
+  }
+  .wordmark .name b { font-weight: 400; color: var(--muted); }
   .wordmark .pip {
     width: 24px;
     height: 24px;
     border-radius: 7px;
     flex: none;
     display: block;
-    border: 1px solid var(--edge);
   }
 
   .theme {
@@ -486,7 +495,7 @@
 <div class="app">
   <div class="device">
     <header class="masthead">
-      <div class="wordmark"><img class="pip" src="favicon.png" alt=""><b>manu</b>Tuner</div>
+      <div class="wordmark"><img class="pip" src="favicon.png" alt=""><span class="name"><b>manu</b>Tuner</span></div>
       <button class="theme" id="theme" type="button" aria-label="Colour theme: auto"></button>
     </header>
 
